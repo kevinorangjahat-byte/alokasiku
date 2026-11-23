@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Alokasiku">
+  <defs>
+    <linearGradient id="bg" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#10B981"/>
+      <stop offset="0.55" stop-color="#0B8A8F"/>
+      <stop offset="1" stop-color="#1D3A8A"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="18" cy="10" r="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+  <rect width="64" height="64" rx="16" fill="url(#shine)"/>
+  <!-- Cincin alokasi: 50% kebutuhan, 30% masa depan, 20% pertumbuhan -->
+  <g fill="none" stroke-width="7.5" stroke-linecap="round" transform="rotate(-90 32 32)">
+    <circle cx="32" cy="32" r="16" stroke="#FFFFFF" stroke-dasharray="40.3 100.53"/>
+    <circle cx="32" cy="32" r="16" stroke="#FFFFFF" stroke-opacity="0.62" stroke-dasharray="20.2 100.53" stroke-dashoffset="-50.27"/>
+    <circle cx="32" cy="32" r="16" stroke="#FFD166" stroke-dasharray="10.1 100.53" stroke-dashoffset="-80.42"/>
+  </g>
+  <circle cx="32" cy="32" r="3.4" fill="#FFFFFF"/>
+</svg>

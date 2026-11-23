@@ -1,0 +1,15 @@
+{
+  "name": "Alokasiku — Kalkulator Alokasi Keuangan",
+  "short_name": "Alokasiku",
+  "start_url": "./#dashboard",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "background_color": "#F4F6F8",
+  "theme_color": "#0E9C72",
+  "icons": [
+    { "src": "assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/logo.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

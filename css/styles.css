@@ -100,7 +100,11 @@
 
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
+/* iOS memperbesar layar saat input < 16px difokuskan — cegah dengan ukuran 16px di layar sentuh. */
+@media (max-width: 960px), (pointer: coarse) {
+  input, select, textarea, .money input, .pct-box input, .goal-name, .input { font-size: 16px !important; }
+}
 body {
   margin: 0;
   background: var(--bg);
@@ -396,11 +400,14 @@ input[type=range]:disabled { opacity: .5; cursor: not-allowed; }
 .computed b { color: var(--text); }
 
 .goal-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.goal { min-width: 0; }
+.goal-top { flex-wrap: wrap; }
+.goal-top .goal-name { flex: 1 1 140px; }
 .goal { border: 1px solid var(--border); border-radius: 14px; padding: 16px; background: var(--surface); }
 .goal-top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .goal-name { flex: 1; min-width: 0; border: 0; border-bottom: 1px dashed transparent; background: none; font-weight: 600; font-size: 14.5px; padding: 4px 0; outline: none; }
 .goal-name:hover, .goal-name:focus { border-bottom-color: var(--border-strong); }
-.goal-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.goal-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .goal-fields .field { margin-bottom: 6px; }
 .goal-fields .money, .goal-fields .input { height: 38px; }
 .goal-status { margin-top: 8px; }
@@ -564,7 +571,8 @@ body.is-locked .money:has(input:disabled), body.is-locked .pct-box:has(input:dis
   .view-title { display: block !important; }
   main.content { padding: 4px 16px 104px; }
   .two { grid-template-columns: 1fr; }
-  .goal-list { grid-template-columns: 1fr; }
+  .goal-list { grid-template-columns: minmax(0, 1fr); }
+  .goal-fields { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .insights { grid-template-columns: 1fr; }
   .bottom-nav {
     display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
@@ -588,10 +596,10 @@ body.is-locked .money:has(input:disabled), body.is-locked .pct-box:has(input:dis
   .field-row { grid-template-columns: 1fr; gap: 0; }
   .card { padding: 18px 16px; }
   .alloc-row, .inv-row {
-    grid-template-columns: minmax(0, 1fr) 84px 34px;
-    grid-template-areas: "name name lock" "range range range" "money money pct" "warn warn warn";
+    grid-template-columns: minmax(0, 1fr) 62px 34px;
+    grid-template-areas: "name name lock" "range range range" "money pct pct" "warn warn warn";
   }
-  .inv-row { grid-template-areas: "name name lock" "range range range" "money money pct" "note note note"; }
+  .inv-row { grid-template-areas: "name name lock" "range range range" "money pct pct" "note note note"; }
   .inv-row .amt { text-align: left; }
   .stat-grid { grid-template-columns: 1fr 1fr; }
   .legend .am { min-width: 0; }

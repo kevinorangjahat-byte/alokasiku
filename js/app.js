@@ -1192,6 +1192,15 @@
     });
   }
 
+  // Kunci zoom: blokir pinch-zoom (Safari iOS) dan double-tap zoom.
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (t) {
+    document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false });
+  });
+  document.addEventListener('touchmove', function (e) {
+    if (e.touches && e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+  // Double-tap zoom dimatikan lewat CSS `touch-action: manipulation`.
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

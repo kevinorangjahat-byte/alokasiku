@@ -1,15 +1,15 @@
 /* Alokasiku — service worker: membuat aplikasi bisa dibuka offline setelah kunjungan pertama. */
-var VERSION = 'alokasiku-v1.4.0';
+var VERSION = 'alokasiku-v1.5.3';
 var CORE = [
   './',
   './index.html',
-  './css/styles.css?v=1.4.0',
-  './js/format.js?v=1.4.0',
-  './js/icons.js?v=1.4.0',
-  './js/engine.js?v=1.4.0',
-  './js/storage.js?v=1.4.0',
-  './js/charts.js?v=1.4.0',
-  './js/app.js?v=1.4.0',
+  './css/styles.css?v=1.5.3',
+  './js/format.js?v=1.5.3',
+  './js/icons.js?v=1.5.3',
+  './js/engine.js?v=1.5.3',
+  './js/storage.js?v=1.5.3',
+  './js/charts.js?v=1.5.3',
+  './js/app.js?v=1.5.3',
   './assets/logo.svg',
   './assets/apple-touch-icon.png',
   './assets/icon-512.png',

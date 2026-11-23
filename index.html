@@ -31,7 +31,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=1.3.0">
+  <link rel="stylesheet" href="css/styles.css?v=1.4.0">
 </head>
 <body>
 <div class="app">
@@ -65,10 +65,14 @@
       </div>
       <div class="top-actions">
         <span class="save-status" id="saveStatus" title="Penyimpanan lokal"><span>Tersimpan lokal</span></span>
+        <button class="icon-btn" id="lockBtn" aria-label="Kunci data" title="Kunci data agar tidak berubah"></button>
         <button class="icon-btn" id="themeBtn" aria-label="Ganti tema" title="Ganti tema terang/gelap"></button>
         <div class="menu-wrap">
           <button class="icon-btn" id="menuBtn" aria-label="Menu data" aria-haspopup="true" aria-expanded="false" data-icon="more"></button>
           <div class="menu" id="menu" hidden>
+            <button data-action="snapshot"><span data-icon="save"></span>Simpan versi data…</button>
+            <button data-action="history"><span data-icon="history"></span>Riwayat versi tersimpan</button>
+            <hr>
             <button data-action="export"><span data-icon="download"></span>Ekspor data (JSON)</button>
             <button data-action="import"><span data-icon="upload"></span>Impor data (JSON)</button>
             <hr>
@@ -80,6 +84,11 @@
     </header>
 
     <main class="content">
+      <div class="banner lock-banner" id="lockBanner" hidden>
+        <span data-icon="lock"></span>
+        <p><b>Data terkunci.</b> Angka dan alokasi tidak bisa diubah, jadi tidak akan berubah tanpa sengaja. Simulasi tetap bisa dicoba.</p>
+        <button class="btn sm" data-action="unlock">Buka kunci</button>
+      </div>
       <!-- ===================== DASHBOARD ===================== -->
       <section class="view" id="view-dashboard">
         <div class="view-title"><h1>Dashboard</h1><p>Ringkasan kondisi & kesehatan finansialmu</p></div>
@@ -361,11 +370,11 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-<script src="js/format.js?v=1.3.0"></script>
-<script src="js/icons.js?v=1.3.0"></script>
-<script src="js/engine.js?v=1.3.0"></script>
-<script src="js/storage.js?v=1.3.0"></script>
-<script src="js/charts.js?v=1.3.0"></script>
-<script src="js/app.js?v=1.3.0"></script>
+<script src="js/format.js?v=1.4.0"></script>
+<script src="js/icons.js?v=1.4.0"></script>
+<script src="js/engine.js?v=1.4.0"></script>
+<script src="js/storage.js?v=1.4.0"></script>
+<script src="js/charts.js?v=1.4.0"></script>
+<script src="js/app.js?v=1.4.0"></script>
 </body>
 </html>

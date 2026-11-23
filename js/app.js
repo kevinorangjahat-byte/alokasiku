@@ -38,6 +38,14 @@
   }
 
   function commit(opts) {
+    if (isLocked() && !(opts && opts.allowLocked)) {
+      // Tidak seharusnya terjadi (kontrol dinonaktifkan), tapi pastikan data tidak ikut berubah.
+      var saved = S.load();
+      if (saved) { state = E.sanitize(saved); buildGoals(); }
+      recompute(); render();
+      toast('Data terkunci — buka kunci untuk mengubah');
+      return;
+    }
     if (opts && opts.dataEdit && state.meta.demo) state.meta.demo = false;
     recompute();
     S.saveDebounced(state);
@@ -46,7 +54,127 @@
 
   function render() {
     VIEWS[current].render();
-    $('#demoBanner').hidden = !state.meta.demo;
+    $('#demoBanner').hidden = !state.meta.demo || isLocked();
+    applyLockUI();
+  }
+
+  /* =========================================================
+     Kunci data & versi tersimpan
+     ========================================================= */
+
+  function isLocked() { return !!(state.meta && state.meta.locked); }
+
+  /** Elemen yang mengubah data. Simulasi & pengaturan tampilan tetap aktif. */
+  var EDIT_SELECTOR = [
+    '#view-data input', '#view-data select', '#view-data [data-add-goal]', '#view-data [data-gremove]',
+    '#view-data [data-set]', '[data-risk]', '#presetGrid [data-preset]', '#allocRows input', '#allocRows [data-role="lock"]',
+    '#invRows input', '#invRows [data-role="lock"]', '#invShareRange', '[data-invmode]', '#simApply',
+    '#demoBanner button', '[data-action="empty"]', '[data-action="demo"]', '[data-action="import"]', '[data-action="reset"]'
+  ].join(',');
+
+  function applyLockUI() {
+    var on = isLocked();
+    document.body.classList.toggle('is-locked', on);
+    $('#lockBanner').hidden = !on;
+    $$(EDIT_SELECTOR).forEach(function (el) { el.disabled = on; });
+    var b = $('#lockBtn');
+    b.innerHTML = I.icon(on ? 'lock' : 'unlock');
+    b.classList.toggle('on', on);
+    b.title = on ? 'Data terkunci — klik untuk membuka' : 'Kunci data agar tidak berubah';
+    b.setAttribute('aria-label', on ? 'Buka kunci data' : 'Kunci data');
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function setLocked(on) {
+    state.meta.locked = !!on;
+    S.save(state);
+    render();
+    toast(on ? 'Data dikunci — tidak bisa diubah sampai dibuka' : 'Kunci dibuka — data bisa diubah lagi');
+  }
+
+  function snapshotSummary(st) {
+    var p = st.profile || {};
+    return (p.incomeType === 'oneTime' ? 'Sekali masuk ' : 'Pendapatan ') + F.rp(p.income || 0) + ' · ' + ((st.goals || []).length) + ' tujuan';
+  }
+  function fmtDate(ts) {
+    try { return new Date(ts).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+    catch (e) { return ''; }
+  }
+
+  function openSaveSnapshot() {
+    var d = new Date();
+    var def = 'Versi ' + d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    openModal({
+      title: 'Simpan versi data',
+      html: '<p class="muted">Simpan salinan data saat ini. Kamu bisa memulihkannya kapan saja dari Riwayat versi, walau data aktif sudah berubah.</p>' +
+        '<label class="field" style="margin-top:12px"><span>Nama versi</span><input class="input" id="snapName" maxlength="60" value="' + esc(def) + '"></label>' +
+        '<label class="switch" style="margin:0"><input type="checkbox" id="snapLock"' + (isLocked() ? ' checked' : '') + '><span>Kunci data setelah disimpan</span></label>',
+      ok: 'Simpan versi',
+      onOk: function () {
+        var name = ($('#snapName').value || '').trim() || def;
+        var list = S.loadSnapshots();
+        var copy = E.clone(state);
+        delete copy.sim; delete copy.ui; delete copy.theme;
+        list.unshift({ id: 's' + Date.now().toString(36), name: name, savedAt: Date.now(), data: copy });
+        if (list.length > 30) list.length = 30;
+        if (!S.saveSnapshots(list)) { toast('Gagal menyimpan — penyimpanan browser penuh atau diblokir'); return false; }
+        var lockAfter = $('#snapLock').checked;
+        setTimeout(function () {
+          if (lockAfter !== isLocked()) setLocked(lockAfter);
+          toast('Versi "' + name + '" disimpan' + (lockAfter ? ' dan data dikunci' : ''));
+        }, 0);
+        return true;
+      }
+    });
+    setTimeout(function () { var i = $('#snapName'); if (i) { i.focus(); i.select(); } }, 60);
+  }
+
+  function openHistory() {
+    var list = S.loadSnapshots();
+    var html = list.length ? '<ul class="snap-list">' + list.map(function (sn) {
+      return '<li data-snap="' + esc(sn.id) + '"><div class="snap-info"><strong>' + esc(sn.name) + '</strong>' +
+        '<span>' + fmtDate(sn.savedAt) + ' · ' + esc(snapshotSummary(sn.data || {})) + '</span></div>' +
+        '<div class="snap-actions"><button type="button" class="btn sm" data-snap-restore>Pulihkan</button>' +
+        '<button type="button" class="icon-btn sm" data-snap-delete aria-label="Hapus versi" title="Hapus versi">' + I.icon('trash') + '</button></div></li>';
+    }).join('') + '</ul>'
+      : '<div class="empty">Belum ada versi tersimpan. Pilih <b>Simpan versi data</b> di menu ⋮ untuk membuat yang pertama.</div>';
+    openModal({ title: 'Riwayat versi tersimpan', html: html, cancel: 'Tutup' });
+    var box = $('#modalBody');
+    box.onclick = function (e) {
+      var li = e.target.closest('[data-snap]');
+      if (!li) return;
+      var id = li.getAttribute('data-snap');
+      var sn = S.loadSnapshots().filter(function (x) { return x.id === id; })[0];
+      if (!sn) return;
+      if (e.target.closest('[data-snap-restore]')) {
+        openModal({
+          title: 'Pulihkan versi?',
+          html: '<p>Data aktif akan diganti dengan versi <b>' + esc(sn.name) + '</b> (' + fmtDate(sn.savedAt) + '). Simpan versi data saat ini dulu jika ingin menyimpannya.</p>',
+          ok: 'Pulihkan',
+          onClose: function (yes) {
+            if (!yes) { openHistory(); return; }
+            var next = E.sanitize(E.clone(sn.data));
+            next.meta.demo = false;
+            next.meta.locked = isLocked();
+            replaceState(next);
+            toast('Versi "' + sn.name + '" dipulihkan');
+          }
+        });
+      } else if (e.target.closest('[data-snap-delete]')) {
+        openModal({
+          title: 'Hapus versi?',
+          html: '<p>Versi <b>' + esc(sn.name) + '</b> akan dihapus permanen dari perangkat ini. Data aktif tidak berubah.</p>',
+          ok: 'Hapus versi', danger: true,
+          onClose: function (yes) {
+            if (yes) {
+              S.saveSnapshots(S.loadSnapshots().filter(function (x) { return x.id !== id; }));
+              toast('Versi dihapus');
+            }
+            openHistory();
+          }
+        });
+      }
+    };
   }
 
   function replaceState(next) {
@@ -191,6 +319,7 @@
   function openModal(opts) {
     var m = $('#modal'), okb = $('#modalOk'), cb = $('#modalCancel');
     if (modalCleanup) modalCleanup(false);
+    $('#modalBody').onclick = null;
     $('#modalTitle').textContent = opts.title;
     $('#modalBody').innerHTML = opts.html;
     okb.textContent = opts.ok || 'Lanjutkan';
@@ -291,7 +420,10 @@
   function handleAction(action) {
     $('#menu').hidden = true;
     $('#menuBtn').setAttribute('aria-expanded', 'false');
-    if (action === 'export') exportData();
+    if (action === 'snapshot') openSaveSnapshot();
+    else if (action === 'history') openHistory();
+    else if (action === 'unlock') setLocked(false);
+    else if (action === 'export') exportData();
     else if (action === 'import') openImport();
     else if (action === 'demo') {
       askConfirm('Ganti data saat ini dengan data contoh?', 'Muat data contoh', false, function () {
@@ -1001,6 +1133,15 @@
     $('#importFile').addEventListener('change', function (e) {
       if (e.target.files && e.target.files[0]) importData(e.target.files[0]);
       e.target.value = '';
+    });
+    $('#lockBtn').addEventListener('click', function () {
+      if (isLocked()) { setLocked(false); return; }
+      openModal({
+        title: 'Kunci data?',
+        html: '<p>Saat terkunci, semua angka, alokasi, dan tujuan tidak bisa diubah sehingga tidak berubah tanpa sengaja. Kamu tetap bisa melihat dashboard dan mencoba simulasi. Buka kunci kapan saja dengan tombol yang sama.</p>',
+        ok: 'Kunci data',
+        onClose: function (yes) { if (yes) setLocked(true); }
+      });
     });
     $('#themeBtn').addEventListener('click', function () {
       state.theme = effectiveTheme() === 'dark' ? 'light' : 'dark';

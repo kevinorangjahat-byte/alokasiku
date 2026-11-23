@@ -24,5 +24,17 @@
   function clear() { try { localStorage.removeItem(KEY); } catch (e) { /* abaikan */ } }
   function onSave(fn) { listeners.push(fn); }
 
-  root.Store = { KEY: KEY, load: load, save: save, saveDebounced: saveDebounced, clear: clear, onSave: onSave };
+  /* Versi data tersimpan (snapshot) — disimpan terpisah dari data aktif. */
+  var SNAP_KEY = 'alokasiku.snapshots.v1';
+  function loadSnapshots() {
+    try { var v = JSON.parse(localStorage.getItem(SNAP_KEY) || '[]'); return Array.isArray(v) ? v : []; }
+    catch (e) { return []; }
+  }
+  function saveSnapshots(list) {
+    try { localStorage.setItem(SNAP_KEY, JSON.stringify(list)); return true; }
+    catch (e) { return false; }
+  }
+
+  root.Store = { KEY: KEY, load: load, save: save, saveDebounced: saveDebounced, clear: clear, onSave: onSave,
+    loadSnapshots: loadSnapshots, saveSnapshots: saveSnapshots };
 })(window);

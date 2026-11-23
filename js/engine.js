@@ -569,7 +569,7 @@
     return {
       version: 1,
       theme: 'auto',
-      meta: { demo: true },
+      meta: { demo: true, locked: false },
       profile: {
         incomeType: 'monthly', income: 8500000, regularIncome: 0,
         expenses: { kos: 1500000, makan: 1800000, transportasi: 500000, tagihan: 450000, lainnya: 300000 },
